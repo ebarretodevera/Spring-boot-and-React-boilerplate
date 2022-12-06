@@ -17,6 +17,16 @@
         <java.version>17</java.version>
         <node.version>v19.1.0</node.version>
         <npm.version>8.19.3</npm.version>
+        <jib-maven-plugin.version>2.5.2</jib-maven-plugin.version>
+        <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
+        <dockerhub.base-url>https://hub.docker.com/u</dockerhub.base-url>
+        <dockerhub.user>ebarretodevera</dockerhub.user>
+        <docker-image-java>eclipse-temurin:17-jre-alpine</docker-image-java>
+        <jib-container-port>8080</jib-container-port>
+        <jib-format>OCI</jib-format>
+        <app-main-class>com.example.backend.BackendApplication</app-main-class>
+        <app.image.name>fullstack</app.image.name>
+        <app.image.tag/>
     </properties>
     <dependencies>
 
@@ -70,72 +80,208 @@
                 </configuration>
             </plugin>
 
-            <!-- STEP 1 -->
             <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.12.1</version>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
                 <configuration>
-                    <workingDirectory>frontend</workingDirectory>
-                    <installDirectory>target</installDirectory>
+                    <from>
+                        <image>${docker-image-java}</image>
+                    </from>
+                    <container>
+                        <mainClass>${app-main-class}</mainClass>
+                        <ports>
+                            <port>${jib-container-port}</port>
+                        </ports>
+                        <format>${jib-format}</format>
+                    </container>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>install node and npm</id>
-                        <goals>
-                            <goal>install-node-and-npm</goal>
-                        </goals>
-                        <configuration>
-                            <nodeVersion>${node.version}</nodeVersion>
-                            <npmVersion>${npm.version}</npmVersion>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>npm install</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>install</arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>npm run build</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>run build</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- STEP 2 -->
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/frontend/build</directory>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                            <outputDirectory>${project.basedir}/target/classes/static</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>
     </build>
+
+    <profiles>
+
+        <profile>
+            <id>jib-push-to-dockerhub</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <version>${jib-maven-plugin.version}</version>
+                        <configuration>
+                            <from>
+                                <image>${docker-image-java}</image>
+                            </from>
+                            <container>
+                                <mainClass>${app-main-class}</mainClass>
+                                <ports>
+                                    <port>${jib-container-port}</port>
+                                </ports>
+                                <format>${jib-format}</format>
+                            </container>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>push-custom-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>${dockerhub.base-url}/${dockerhub.user}/${app.image.name}:${app.image.tag}</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>push-latest-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>${dockerhub.base-url}/${dockerhub.user}/${app.image.name}:latest</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>jib-push-to-local</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <version>${jib-maven-plugin.version}</version>
+                        <configuration>
+                            <from>
+                                <image>${docker-image-java}</image>
+                            </from>
+                            <container>
+                                <mainClass>${app-main-class}</mainClass>
+                                <ports>
+                                    <port>${jib-container-port}</port>
+                                </ports>
+                                <format>${jib-format}</format>
+                            </container>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>push-custom-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>${dockerhub.user}/${app.image.name}:${app.image.tag}</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>dockerBuild</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>push-latest-tag</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <to>
+                                        <image>${dockerhub.user}/${app.image.name}:latest</image>
+                                    </to>
+                                </configuration>
+                                <goals>
+                                    <goal>dockerBuild</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>build-frontend</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>${frontend-maven-plugin.version}</version>
+                        <configuration>
+                            <nodeVersion>${node.version}</nodeVersion>
+                            <workingDirectory>${project.basedir}/frontend</workingDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>install node and npm</id>
+                                <goals>
+                                    <goal>install-node-and-npm</goal>
+                                </goals>
+                                <configuration>
+                                    <nodeVersion>${node.version}</nodeVersion>
+                                    <npmVersion>${npm.version}</npmVersion>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm install</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>install</arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm run build</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>run build</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-build-folder</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.basedir}/frontend/build</directory>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                    <outputDirectory>${project.basedir}/target/classes/static</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
 
 </project>

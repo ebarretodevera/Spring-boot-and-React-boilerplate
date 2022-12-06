@@ -21,3 +21,9 @@ java -jar target/backend-0.0.1-SNAPSHOT.jar
 ```bash
 http://localhost:8080/
 ```
+
+## Jib
+```bash
+mvnw clean install -P build-frontend -P jib-push-to-dockerhub -Dapp.image.tag=latest
+mvnw clean install -P build-frontend -P jib-push-to-local -Dapp.image.tag=latest
+```
