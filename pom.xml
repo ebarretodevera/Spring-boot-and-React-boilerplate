@@ -132,7 +132,10 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <to>
+<!--
                                         <image>${dockerhub.base-url}/${dockerhub.user}/${app.image.name}:${app.image.tag}</image>
+-->
+                                        <image>${dockerhub.user}/${app.image.name}:${app.image.tag}</image>
                                     </to>
                                 </configuration>
                                 <goals>
@@ -144,7 +147,10 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <to>
+<!--
                                         <image>${dockerhub.base-url}/${dockerhub.user}/${app.image.name}:latest</image>
+-->
+                                        <image>${dockerhub.user}/${app.image.name}:latest</image>
                                     </to>
                                 </configuration>
                                 <goals>
