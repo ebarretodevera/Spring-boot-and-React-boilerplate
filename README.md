@@ -22,7 +22,20 @@ java -jar target/backend-0.0.1-SNAPSHOT.jar
 http://localhost:8080/
 ```
 
-## Jib
+## Docker & Jib
+Prerequisites:
+- Install docker-desktop
+- Add Jib to maven and configure
+- Having account in Dockerhub
+
+Known problems:
+- I had problems with 401 Http error. I fixed executing this command:
+```bash
+docker login registry.hub.docker.com
+docker login registry-1.docker.io
+```
+
+How to build & deploy:
 ```bash
 mvnw clean install -P build-frontend -P jib-push-to-dockerhub -Dapp.image.tag=latest
 mvnw clean install -P build-frontend -P jib-push-to-local -Dapp.image.tag=latest
